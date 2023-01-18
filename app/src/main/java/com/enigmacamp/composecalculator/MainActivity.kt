@@ -71,14 +71,17 @@ fun CalculatorClassState(state: CalculatorState) {
 @Composable
 fun CalculatorLocalState() {
     // Try to rotate the device
-    var stateAngka1 by remember {
-        mutableStateOf("")
+//    var stateAngka1 by remember {
+//        mutableStateOf("")
+//    }
+//    var stateAngka2 by remember {
+//        mutableStateOf("")
+//    }
+//
+//    val stateResult = sum(stateAngka1, stateAngka2)
+    val state = remember {
+        CalculatorState()
     }
-    var stateAngka2 by remember {
-        mutableStateOf("")
-    }
-
-    val stateResult = sum(stateAngka1, stateAngka2)
 
     Log.d("Recompose", "True")
     Column(
@@ -86,10 +89,10 @@ fun CalculatorLocalState() {
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(text = "Result: $stateResult")
+        Text(text = "Result: ${state.stateResult}")
         TextField(
-            stateAngka1,
-            onValueChange = { stateAngka1 = it },
+            state.stateAngka1,
+            onValueChange = { state.stateAngka1 = it },
             label = { Text(text = "Angka 1") },
             placeholder = {
                 Text(text = "Masukan angka 1")
@@ -98,8 +101,8 @@ fun CalculatorLocalState() {
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
         )
         TextField(
-            stateAngka2,
-            onValueChange = { stateAngka2 = it },
+            state.stateAngka2,
+            onValueChange = { state.stateAngka2 = it },
             label = { Text(text = "Angka 2") },
             placeholder = {
                 Text(text = "Masukan angka 2")
