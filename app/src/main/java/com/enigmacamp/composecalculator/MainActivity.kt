@@ -27,8 +27,7 @@ class MainActivity : ComponentActivity() {
                 Surface(
                     modifier = Modifier.fillMaxSize(), color = MaterialTheme.colors.background
                 ) {
-//                    CalculatorClassState(CalculatorState())
-                    CalculatorLocalState()
+                    CalculatorClassState(CalculatorState())
                 }
             }
         }
@@ -39,15 +38,19 @@ class MainActivity : ComponentActivity() {
 fun CalculatorClassState(state: CalculatorState) {
     // Try to rotate the device
     Log.d("Recompose", "True")
+    val stateAngka1 = state.stateAngka1.collectAsState()
+    val stateAngka2 = state.stateAngka2.collectAsState()
+    val stateResult = state.stateResult.collectAsState()
+
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(text = "Result: ${state.stateResult}")
+        Text(text = "Result: ${stateResult.value}")
         TextField(
-            state.stateAngka1,
-            onValueChange = { state.stateAngka1 = it },
+            stateAngka1.value,
+            onValueChange = { state.onChangeAngka1(it) },
             label = { Text(text = "Angka 1") },
             placeholder = {
                 Text(text = "Masukan angka 1")
@@ -56,8 +59,8 @@ fun CalculatorClassState(state: CalculatorState) {
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
         )
         TextField(
-            state.stateAngka2,
-            onValueChange = { state.stateAngka2 = it },
+            stateAngka2.value,
+            onValueChange = { state.onChangeAngka2(it) },
             label = { Text(text = "Angka 2") },
             placeholder = {
                 Text(text = "Masukan angka 2")
@@ -66,57 +69,6 @@ fun CalculatorClassState(state: CalculatorState) {
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
         )
     }
-}
-
-@Composable
-fun CalculatorLocalState() {
-    // Try to rotate the device
-//    var stateAngka1 by remember {
-//        mutableStateOf("")
-//    }
-//    var stateAngka2 by remember {
-//        mutableStateOf("")
-//    }
-//
-//    val stateResult = sum(stateAngka1, stateAngka2)
-    val state = remember {
-        CalculatorState()
-    }
-
-    Log.d("Recompose", "True")
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(text = "Result: ${state.stateResult}")
-        TextField(
-            state.stateAngka1,
-            onValueChange = { state.stateAngka1 = it },
-            label = { Text(text = "Angka 1") },
-            placeholder = {
-                Text(text = "Masukan angka 1")
-            },
-            singleLine = true,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-        )
-        TextField(
-            state.stateAngka2,
-            onValueChange = { state.stateAngka2 = it },
-            label = { Text(text = "Angka 2") },
-            placeholder = {
-                Text(text = "Masukan angka 2")
-            },
-            singleLine = true,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-        )
-    }
-}
-
-fun sum(v1: String, v2: String) = try {
-    (v1.toInt() + v2.toInt()).toString()
-} catch (e: NumberFormatException) {
-    "Parsing error :("
 }
 
 @Preview(showBackground = true)
