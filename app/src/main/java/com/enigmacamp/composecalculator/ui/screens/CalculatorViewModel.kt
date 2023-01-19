@@ -1,14 +1,10 @@
-package com.enigmacamp.composecalculator
+package com.enigmacamp.composecalculator.ui.screens
 
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted.Companion.WhileSubscribed
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.stateIn
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.flow.*
 
-class CalculatorState {
+class CalculatorViewModel : ViewModel() {
     private var _stateAngka1 = MutableStateFlow("")
     val stateAngka1 = _stateAngka1.asStateFlow()
 
@@ -17,7 +13,7 @@ class CalculatorState {
 
     val stateResult = combine(_stateAngka1, _stateAngka2) { a, b ->
         sum(a, b)
-    }.stateIn(CoroutineScope(Dispatchers.Main), WhileSubscribed(), "0")
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), "0")
 
 
     fun onChangeAngka1(value: String) {
