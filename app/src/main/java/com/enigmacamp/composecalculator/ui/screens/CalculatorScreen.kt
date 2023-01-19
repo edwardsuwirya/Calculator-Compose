@@ -13,7 +13,7 @@ import com.enigmacamp.composecalculator.ui.components.NumberInput
 import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
-fun CalculatorScreen(viewModel: CalculatorViewModel = viewModel()) {
+fun CalculatorScreen(viewModel: CalculatorViewModel = viewModel(factory = CalculatorViewModel.CalculatorViewModelFactory)) {
     Log.d("Recompose", "True")
     val stateAngka1 = viewModel.stateAngka1.collectAsState()
     val stateAngka2 = viewModel.stateAngka2.collectAsState()

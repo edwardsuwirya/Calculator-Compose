@@ -1,10 +1,13 @@
 package com.enigmacamp.composecalculator.ui.screens
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider.Factory
 import androidx.lifecycle.viewModelScope
+import com.enigmacamp.composecalculator.service.CalculatorService
+import com.enigmacamp.composecalculator.service.CalculatorServiceImpl
 import kotlinx.coroutines.flow.*
 
-class CalculatorViewModel : ViewModel() {
+class CalculatorViewModel(val service: CalculatorService) : ViewModel() {
     private var _stateAngka1 = MutableStateFlow("")
     val stateAngka1 = _stateAngka1.asStateFlow()
 
@@ -12,7 +15,7 @@ class CalculatorViewModel : ViewModel() {
     val stateAngka2 = _stateAngka2.asStateFlow()
 
     val stateResult = combine(_stateAngka1, _stateAngka2) { a, b ->
-        sum(a, b)
+        service.sum(a, b)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), "0")
 
 
@@ -24,9 +27,10 @@ class CalculatorViewModel : ViewModel() {
         _stateAngka2.value = value
     }
 
-    private fun sum(v1: String, v2: String) = try {
-        (v1.toInt() + v2.toInt()).toString()
-    } catch (e: NumberFormatException) {
-        "Parsing error :("
+    companion object CalculatorViewModelFactory : Factory {
+        override fun <T : ViewModel> create(modelClass: Class<T>): T {
+            return CalculatorViewModel(CalculatorServiceImpl()) as T
+        }
     }
+
 }
