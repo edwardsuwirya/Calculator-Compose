@@ -7,29 +7,62 @@ import androidx.lifecycle.viewModelScope
 import com.enigmacamp.composecalculator.service.CalculatorService
 import com.enigmacamp.composecalculator.service.CalculatorServiceImpl
 import com.enigmacamp.composecalculator.utilities.UiState
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.*
+import com.enigmacamp.composecalculator.utilities.toIntSafety
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 
 class CalculatorViewModel(val service: CalculatorService) : ViewModel() {
     private var _calcState = MutableStateFlow(CalculatorState())
-    val calcState = _calcState.asStateFlow().transform { res ->
-        Log.d("Recompose", "Calc")
-        emit(res.copy(uiState = UiState.Loading))
-        val result = service.sum(res.angka1, res.angka2)
-        emit(res.copy(uiState = result))
-    }
-        .flowOn(Dispatchers.IO)
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), CalculatorState())
-
+    val calcState = _calcState.asStateFlow()
 
     fun onEvent(event: CalculatorEvent) {
         Log.d("Recompose", "Content Change")
         when (event) {
-            is CalculatorEvent.Number1Input -> _calcState.value =
-                _calcState.value.copy(angka1 = event.num)
+            is CalculatorEvent.NumberButtonClick -> {
+                val stringNum = "${_calcState.value.displayText}${event.num}"
+                if (_calcState.value.opr == null) {
+                    _calcState.value =
+                        _calcState.value.copy(
+                            num1 = stringNum,
+                            displayText = stringNum.toIntSafety().toString()
+                        )
+                } else {
+                    _calcState.value =
+                        _calcState.value.copy(
+                            num2 = stringNum,
+                            displayText = stringNum
+                        )
+                }
 
-            is CalculatorEvent.Number2Input -> _calcState.value =
-                _calcState.value.copy(angka2 = event.num)
+            }
+
+            is CalculatorEvent.OperatorButtonClick -> {
+                when (event.opr) {
+                    "=" -> {
+                        if (_calcState.value.num1.isNotEmpty() && _calcState.value.num2.isNotEmpty()) {
+                            viewModelScope.launch {
+                                _calcState.value = _calcState.value.copy(uiState = UiState.Loading)
+                                val result =
+                                    service.sum(_calcState.value.num1, _calcState.value.num2)
+                                _calcState.value =
+                                    _calcState.value.copy(uiState = result)
+                            }
+                        }
+                    }
+                    "C" -> {
+                        _calcState.value =
+                            CalculatorState()
+                    }
+                    else -> {
+                        if (_calcState.value.num1.isNotEmpty() && _calcState.value.num2.isEmpty()) {
+                            _calcState.value =
+                                _calcState.value.copy(displayText = "", opr = event.opr)
+                        }
+                    }
+                }
+
+            }
         }
     }
 

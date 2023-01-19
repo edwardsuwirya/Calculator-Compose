@@ -1,16 +1,15 @@
 package com.enigmacamp.composecalculator.ui.screens
 
 import android.util.Log
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import com.enigmacamp.composecalculator.ui.components.CalcResult
-import com.enigmacamp.composecalculator.ui.components.NumberInput
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.enigmacamp.composecalculator.ui.components.CalcButton
+import com.enigmacamp.composecalculator.ui.components.CalcResult
 import com.enigmacamp.composecalculator.utilities.UiState
 
 @Composable
@@ -27,7 +26,7 @@ fun Content(
     Log.d("Recompose", "Content with state $stateResult")
     val uiState = stateResult.uiState
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier.padding(start = 24.dp, end = 24.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -35,19 +34,64 @@ fun Content(
             is UiState.Loading -> CalcResult(result = "Please wait")
             is UiState.Success -> CalcResult(result = uiState.data ?: "")
             is UiState.Error -> CalcResult(result = uiState.errorMessage ?: "")
-            else -> CalcResult(result = "")
+            else -> CalcResult(result = stateResult.displayText)
         }
-        NumberInput(
-            label = "Number 1",
-            placeholder = "Input your 1st number",
-            numberVal = stateResult.angka1,
-            onChange = { onEvent(CalculatorEvent.Number1Input(it)) }
-        )
-        NumberInput(
-            label = "Number 2",
-            placeholder = "Input your 2nd number",
-            numberVal = stateResult.angka2,
-            onChange = { onEvent(CalculatorEvent.Number2Input(it)) }
-        )
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceAround
+        ) {
+            Column() {
+                CalcButton(
+                    label = "7",
+                    onClick = { onEvent(CalculatorEvent.NumberButtonClick(it)) })
+                CalcButton(
+                    label = "4",
+                    onClick = { onEvent(CalculatorEvent.NumberButtonClick(it)) })
+                CalcButton(
+                    label = "1",
+                    onClick = { onEvent(CalculatorEvent.NumberButtonClick(it)) })
+            }
+            Column() {
+                CalcButton(
+                    label = "8",
+                    onClick = { onEvent(CalculatorEvent.NumberButtonClick(it)) })
+                CalcButton(
+                    label = "5",
+                    onClick = { onEvent(CalculatorEvent.NumberButtonClick(it)) })
+                CalcButton(
+                    label = "2",
+                    onClick = { onEvent(CalculatorEvent.NumberButtonClick(it)) })
+                CalcButton(
+                    label = "0",
+                    onClick = { onEvent(CalculatorEvent.NumberButtonClick(it)) })
+            }
+            Column() {
+                CalcButton(
+                    label = "9",
+                    onClick = { onEvent(CalculatorEvent.NumberButtonClick(it)) })
+                CalcButton(
+                    label = "6",
+                    onClick = { onEvent(CalculatorEvent.NumberButtonClick(it)) })
+                CalcButton(
+                    label = "3",
+                    onClick = { onEvent(CalculatorEvent.NumberButtonClick(it)) })
+            }
+            Column() {
+                CalcButton(
+                    label = "C",
+                    onClick = { onEvent(CalculatorEvent.OperatorButtonClick(it)) })
+                CalcButton(
+                    label = "+",
+                    onClick = { onEvent(CalculatorEvent.OperatorButtonClick(it)) })
+                CalcButton(
+                    label = "-",
+                    onClick = { onEvent(CalculatorEvent.OperatorButtonClick(it)) })
+                CalcButton(
+                    label = "=",
+                    onClick = { onEvent(CalculatorEvent.OperatorButtonClick(it)) })
+            }
+        }
+
     }
 }

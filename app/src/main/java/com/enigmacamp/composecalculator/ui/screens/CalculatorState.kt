@@ -4,6 +4,8 @@ import com.enigmacamp.composecalculator.utilities.UiState
 
 data class CalculatorState(
     val uiState: UiState<String>? = null,
-    val angka1: String = "",
-    val angka2: String = "",
+    val displayText: String = "",
+    val num1: String = "",
+    val num2: String = "",
+    val opr: String? = null,
 )
