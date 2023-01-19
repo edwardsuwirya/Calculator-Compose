@@ -10,4 +10,8 @@ class CalculatorServiceImpl : CalculatorService {
         return UiState.Success((v1.toIntSafety() + v2.toIntSafety()).toString())
     }
 
+    override suspend fun subtract(v1: String, v2: String): UiState<String> {
+        delay(3000L)
+        return UiState.Success((v1.toIntSafety() - v2.toIntSafety()).toString())
+    }
 }
