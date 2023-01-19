@@ -11,31 +11,43 @@ import androidx.compose.ui.Modifier
 import com.enigmacamp.composecalculator.ui.components.CalcResult
 import com.enigmacamp.composecalculator.ui.components.NumberInput
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.enigmacamp.composecalculator.utilities.UiState
 
 @Composable
 fun CalculatorScreen(viewModel: CalculatorViewModel = viewModel(factory = CalculatorViewModel.CalculatorViewModelFactory)) {
-    Log.d("Recompose", "True")
-    val stateAngka1 = viewModel.stateAngka1.collectAsState()
-    val stateAngka2 = viewModel.stateAngka2.collectAsState()
-    val stateResult = viewModel.stateResult.collectAsState()
+    val state = viewModel.calcState.collectAsState()
+    Content(stateResult = state.value, viewModel::onEvent)
+}
 
+@Composable
+fun Content(
+    stateResult: CalculatorState,
+    onEvent: (CalculatorEvent) -> Unit
+) {
+    Log.d("Recompose", "Content with state $stateResult")
+    val uiState = stateResult.uiState
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        CalcResult(result = stateResult.value)
+        when (uiState) {
+            is UiState.Loading -> CalcResult(result = "Please wait")
+            is UiState.Success -> CalcResult(result = uiState.data ?: "")
+            is UiState.Error -> CalcResult(result = uiState.errorMessage ?: "")
+            else -> CalcResult(result = "")
+        }
         NumberInput(
             label = "Number 1",
             placeholder = "Input your 1st number",
-            numberVal = stateAngka1.value,
-            onChange = viewModel::onChangeAngka1
+            numberVal = stateResult.angka1,
+            onChange = { onEvent(CalculatorEvent.Number1Input(it)) }
         )
         NumberInput(
             label = "Number 2",
             placeholder = "Input your 2nd number",
-            numberVal = stateAngka2.value,
-            onChange = viewModel::onChangeAngka2
+            numberVal = stateResult.angka2,
+            onChange = { onEvent(CalculatorEvent.Number2Input(it)) }
         )
     }
 }

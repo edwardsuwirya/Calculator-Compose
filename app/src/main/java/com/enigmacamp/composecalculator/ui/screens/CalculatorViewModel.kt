@@ -1,30 +1,36 @@
 package com.enigmacamp.composecalculator.ui.screens
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider.Factory
 import androidx.lifecycle.viewModelScope
 import com.enigmacamp.composecalculator.service.CalculatorService
 import com.enigmacamp.composecalculator.service.CalculatorServiceImpl
+import com.enigmacamp.composecalculator.utilities.UiState
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 
 class CalculatorViewModel(val service: CalculatorService) : ViewModel() {
-    private var _stateAngka1 = MutableStateFlow("")
-    val stateAngka1 = _stateAngka1.asStateFlow()
-
-    private var _stateAngka2 = MutableStateFlow("")
-    val stateAngka2 = _stateAngka2.asStateFlow()
-
-    val stateResult = combine(_stateAngka1, _stateAngka2) { a, b ->
-        service.sum(a, b)
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), "0")
-
-
-    fun onChangeAngka1(value: String) {
-        _stateAngka1.value = value
+    private var _calcState = MutableStateFlow(CalculatorState())
+    val calcState = _calcState.asStateFlow().transform { res ->
+        Log.d("Recompose", "Calc")
+        emit(res.copy(uiState = UiState.Loading))
+        val result = service.sum(res.angka1, res.angka2)
+        emit(res.copy(uiState = result))
     }
+        .flowOn(Dispatchers.IO)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), CalculatorState())
 
-    fun onChangeAngka2(value: String) {
-        _stateAngka2.value = value
+
+    fun onEvent(event: CalculatorEvent) {
+        Log.d("Recompose", "Content Change")
+        when (event) {
+            is CalculatorEvent.Number1Input -> _calcState.value =
+                _calcState.value.copy(angka1 = event.num)
+
+            is CalculatorEvent.Number2Input -> _calcState.value =
+                _calcState.value.copy(angka2 = event.num)
+        }
     }
 
     companion object CalculatorViewModelFactory : Factory {
