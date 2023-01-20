@@ -11,11 +11,11 @@ import com.enigmacamp.composecalculator.utilities.UiState
 import com.enigmacamp.composecalculator.utilities.toIntSafety
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class CalculatorViewModel(
-    private val addUseCase: AddNumberUseCase,
-    private val subtractUseCase: SubtractNumberUseCase
+    private val addUseCase: AddNumberUseCase, private val subtractUseCase: SubtractNumberUseCase
 ) : ViewModel() {
     private var _calcState = MutableStateFlow(CalculatorState())
     val calcState = _calcState.asStateFlow()
@@ -26,17 +26,17 @@ class CalculatorViewModel(
             is CalculatorEvent.NumberButtonClick -> {
                 val stringNum = "${_calcState.value.displayText}${event.num}"
                 if (_calcState.value.opr == null) {
-                    _calcState.value =
-                        _calcState.value.copy(
-                            num1 = stringNum,
-                            displayText = stringNum.toIntSafety().toString()
+                    _calcState.update {
+                        it.copy(
+                            num1 = stringNum, displayText = stringNum.toIntSafety().toString()
                         )
+                    }
                 } else {
-                    _calcState.value =
-                        _calcState.value.copy(
-                            num2 = stringNum,
-                            displayText = stringNum
+                    _calcState.update {
+                        it.copy(
+                            num2 = stringNum, displayText = stringNum
                         )
+                    }
                 }
 
             }
@@ -47,40 +47,38 @@ class CalculatorViewModel(
                         if (_calcState.value.num1.isNotEmpty() && _calcState.value.num2.isNotEmpty()) {
                             viewModelScope.launch {
                                 _calcState.value = _calcState.value.copy(uiState = UiState.Loading)
-                                _calcState.value.opr?.let {
+                                _calcState.value.opr?.let { opr->
                                     var result: UiState<String>? = null
-                                    when (it) {
+                                    when (opr) {
                                         "+" -> {
-                                            result =
-                                                addUseCase(
-                                                    _calcState.value.num1,
-                                                    _calcState.value.num2
-                                                )
+                                            result = addUseCase(
+                                                _calcState.value.num1, _calcState.value.num2
+                                            )
 
                                         }
                                         "-" -> {
-                                            result =
-                                                subtractUseCase(
-                                                    _calcState.value.num1,
-                                                    _calcState.value.num2
-                                                )
+                                            result = subtractUseCase(
+                                                _calcState.value.num1, _calcState.value.num2
+                                            )
                                         }
                                     }
-                                    _calcState.value =
-                                        _calcState.value.copy(uiState = result)
+                                    _calcState.update {
+                                        it.copy(uiState = result)
+                                    }
+
                                 }
 
                             }
                         }
                     }
                     "C" -> {
-                        _calcState.value =
-                            CalculatorState()
+                        _calcState.value = CalculatorState()
                     }
                     else -> {
                         if (_calcState.value.num1.isNotEmpty() && _calcState.value.num2.isEmpty()) {
-                            _calcState.value =
-                                _calcState.value.copy(displayText = "", opr = event.opr)
+                            _calcState.update {
+                                it.copy(displayText = "", opr = event.opr)
+                            }
                         }
                     }
                 }
